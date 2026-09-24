@@ -6,6 +6,26 @@ on:
   pull_request:
 
 jobs:
+  # Conventional Commits: validate PR title (in recent history the prefix/scope).
+  # Runs as its own job so a malformed title fails fast before the matrix runs.
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Validate most recent commit message
+        run: npx commitlint --from HEAD~1 --to HEAD
+      # PR title is only present in pull_request events.
+      - name: Validate PR title
+        if: github.event_name == 'pull_request'
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: echo "$TITLE" | npx commitlint
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:
