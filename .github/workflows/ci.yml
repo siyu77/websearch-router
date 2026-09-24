@@ -12,19 +12,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # config comes from the repo; shallow is fine, we validate PR titles (not git history).
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Validate most recent commit message
-        run: npx commitlint --from HEAD~1 --to HEAD
-      # PR title is only present in pull_request events.
+      # Conventional Commits gate: validate the PR title.
+      # Running as its own job (vs. inside the matrix) gives a standalone, fast-failing
+      # status check for the "required status checks" branch rule.
       - name: Validate PR title
         if: github.event_name == 'pull_request'
         env:
           TITLE: ${{ github.event.pull_request.title }}
-        run: echo "$TITLE" | npx commitlint
+        run: |
+          echo "Validating PR title: $TITLE"
+          echo "$TITLE" | npx commitlint
+      # On main pushes there's no PR title — validate the pushed commit instead.
+      - name: Validate pushed commit message
+        if: github.event_name == 'push'
+        run: npx commitlint --from HEAD~1 --to HEAD
 
   test:
     runs-on: ${{ matrix.os }}
