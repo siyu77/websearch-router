@@ -1,0 +1,27 @@
+name: Publish
+
+on:
+  push:
+    tags: ['v*']
+
+# npm trusted publishing (OIDC): no NPM_TOKEN secret needed. The npm package must
+# have this repo + workflow configured as a trusted publisher.
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run pack
+      # --provenance links the tarball to this workflow run (requires id-token: write).
+      - run: npm publish ./websearch-router-*.tgz --provenance --access public

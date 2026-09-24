@@ -1,0 +1,17 @@
+{
+  "name": "websearch-router",
+  "version": "0.1.1",
+  "type": "module",
+  "license": "MIT",
+  "author": "siyu77",
+  "description": "A local websearch aggregation routing service — CLI (start/stop/status + tray) that launches the server and dashboard",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/siyu77/websearch-router.git"
+  },
+  "bin": { "websearch": "./dist/cli.js" },
+  "main": "dist/cli.js",
+  "scripts": { "dev": "tsc --watch --outDir dist", "build": "tsc --outDir dist", "postbuild": "node -e \"const fs=require('fs');fs.mkdirSync('dist/tray',{recursive:true});fs.copyFileSync('src/tray/tray.ps1','dist/tray/tray.ps1');try{fs.copyFileSync('src/tray/icon.ico','dist/tray/icon.ico')}catch{};fs.mkdirSync('dist/scripts',{recursive:true});fs.copyFileSync('scripts/install-systray.mjs','dist/scripts/install-systray.mjs');const p='dist/cli.js';let s=fs.readFileSync(p,'utf8');if(!s.startsWith('#!')){fs.writeFileSync(p,'#!/usr/bin/env node\\n'+s)};\"", "test": "vitest run" },
+  "dependencies": { "@websearch/router-internal": "*" },
+  "devDependencies": { "@types/node": "^22.5.0" }
+}
