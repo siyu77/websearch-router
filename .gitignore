@@ -1,0 +1,17 @@
+node_modules/
+dist/
+packages/server/dashboard-dist/
+/websearch-router-*.tgz
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+.env
+
+# One-off probe / scratch scripts (e.g. ddg-probe*.mjs used to diagnose engine
+# anti-bot behavior). Keep throwaway HTTP experiments out of git status.
+*-probe*.mjs
+*probe*.mjs
+scratch/
+
+# JetBrains IDE per-user config
+.idea/

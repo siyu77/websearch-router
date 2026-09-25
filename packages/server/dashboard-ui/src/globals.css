@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+
+/* Design tokens — single source of truth for the whole dashboard. Utility
+   classes reference these as text-danger / bg-brand / border-border / ... */
+@theme {
+  --color-brand: #2563eb;
+  --color-brand-hover: #1d4ed8;
+  --color-danger: #dc2626;
+  --color-border: #d1d5db;
+  --color-muted: #6b7280;
+  --color-text: #111827;
+  --color-bg: #ffffff;
+  --color-surface: #f9fafb;
+  --color-row-hover: #f3f4f6;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}

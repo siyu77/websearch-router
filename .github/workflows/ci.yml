@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Conventional Commits: validate PR title (in recent history the prefix/scope).
+  # Runs as its own job so a malformed title fails fast before the matrix runs.
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # config comes from the repo; shallow is fine, we validate PR titles (not git history).
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Conventional Commits gate: validate the PR title.
+      # Running as its own job (vs. inside the matrix) gives a standalone, fast-failing
+      # status check for the "required status checks" branch rule.
+      - name: Validate PR title
+        if: github.event_name == 'pull_request'
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          echo "Validating PR title: $TITLE"
+          echo "$TITLE" | npx commitlint
+      # On main pushes there's no PR title — validate the pushed commit instead.
+      # The repo keeps a single-root squash history, so HEAD may have no parent.
+      # Only use --from HEAD~1 when a parent exists; otherwise validate HEAD alone.
+      - name: Validate pushed commit message
+        if: github.event_name == 'push'
+        run: |
+          if git cat-file -e HEAD~1 2>/dev/null; then
+            npx commitlint --from HEAD~1 --to HEAD
+          else
+            echo "Root commit (no parent) — validating HEAD directly"
+            echo "$(git log -1 --pretty=%B)" | npx commitlint
+          fi
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build

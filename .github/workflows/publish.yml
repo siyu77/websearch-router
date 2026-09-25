@@ -1,0 +1,39 @@
+name: Publish
+
+on:
+  push:
+    tags: ['v*']
+
+# npm trusted publishing (OIDC): no NPM_TOKEN secret needed. The npm package must
+# have this repo + workflow configured as a trusted publisher.
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run pack
+      # --provenance links the tarball to this workflow run (requires id-token: write).
+      #
+      # IMPORTANT: do NOT set registry-url in setup-node above. setup-node writes a
+      # `.npmrc` with `_authToken=${NODE_AUTH_TOKEN}`; with a (possibly empty) token
+      # present, npm uses token auth instead of OIDC and the registry returns E404.
+      # OIDC authenticates on its own — no token, no registry-url.
+      #
+      # Use the latest npm just for the publish step (libnpmpublish >= 11 / npm >=
+      # 11.5.1 supports OIDC *token exchange*, not just provenance signing; older npm
+      # signs provenance but can't authenticate the PUT -> silent E404). We invoke it
+      # via `npx` rather than `npm install -g npm@latest` — a global upgrade rebuilds
+      # better-sqlite3's native binding against the new npm's node-gyp and breaks
+      # `npm test` on linux runners. `npx --yes npm@latest` only swaps the CLI for this
+      # one command, leaving node_modules and the runner's global npm untouched.
+      - run: npx --yes npm@latest publish ./websearch-router-*.tgz --provenance --access public

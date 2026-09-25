@@ -1,0 +1,39 @@
+{
+  "name": "@websearch/router-internal",
+  "version": "0.1.2",
+  "type": "module",
+  "license": "MIT",
+  "author": "siyu77",
+  "description": "Server core for websearch-router (internal, bundled into the websearch-router CLI package)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/siyu77/websearch-router.git"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "tsc --watch --outDir dist",
+    "build": "tsc --outDir dist",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1",
+    "axios": "^1.7.9",
+    "cheerio": "^1.0.0",
+    "express": "^5.2.1",
+    "ipaddr.js": "^2.3.0",
+    "sql.js": "^1.14.2",
+    "zod": "^3.25 || ^4.0",
+    "zustand": "^5.0.10"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^12.6.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/express": "^5.0.6",
+    "@types/sql.js": "^1.4.11",
+    "@types/supertest": "^6.0.0",
+    "supertest": "^7.0.0"
+  }
+}
